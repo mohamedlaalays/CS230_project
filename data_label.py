@@ -3,8 +3,8 @@ from tkinter.ttk import Style
 import PIL.Image, PIL.ImageTk
 from tkinter import *
 
-PATH = 'dataset/pix2pix/test/'
-# PATH = 'dataset/pix2pix/train/'
+# PATH = 'dataset/pix2pix/test/'
+PATH = 'dataset/pix2pix/train/'
 # PATH = 'dataset/pix2pix/val/'
 
 def get_calligraphy_style(file):
