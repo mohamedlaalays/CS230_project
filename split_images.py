@@ -9,7 +9,8 @@ from data_label import main
 # PATH = 'dataset/images/train/'
 # PATH = 'dataset/images/test/'
 PATH = 'dataset/images/val/'
-FOLDERS = ["Kufi", "Farisi", "Thuluth", "Diwani"]
+# FOLDERS = ["Farisi", "Thuluth", "Diwani"]
+FOLDERS = ["Other"]
 
 def split_img():
 
