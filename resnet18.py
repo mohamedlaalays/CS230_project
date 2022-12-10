@@ -8,6 +8,7 @@ import torch.backends.cudnn as cudnn
 import numpy as np
 import torchvision
 from torchvision import datasets, models, transforms
+from torchvision.models import resnet18, ResNet18_Weights
 import matplotlib.pyplot as plt
 import time
 import os
@@ -38,15 +39,20 @@ def load_data(data_dir='ACdata_base'):
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
             # transforms.Grayscale(num_output_channels=1), # Change to grayscale
         ]),
+        'test': transforms.Compose([
+            transforms.CenterCrop(500),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+        ])
     }
 
     image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
                                             data_transforms[x])
-                    for x in ['train', 'val']}
+                    for x in ['train', 'val', 'test']}
     dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=4,
                                                 shuffle=True, num_workers=4)
-                for x in ['train', 'val']}
-    dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
+                for x in ['train', 'val', 'test']}
+    dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val', 'test']}
     class_names = image_datasets['train'].classes
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -65,7 +71,7 @@ def imshow(inp, title=None):
     # print("inp: ", inp)
     if title is not None:
         plt.title(title)
-    plt.pause(5)  # pause a bit so that plots are updated
+    plt.pause(3)  # pause a bit so that plots are updated
 
 
 
@@ -137,7 +143,8 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
 
 
 def fine_tune():
-    model_ft = models.resnet18(pretrained=True)
+    # model_ft = models.resnet18(pretrained=True)
+    model_ft = models.resnet18(weights=ResNet18_Weights.DEFAULT)
 
     # model_ft = models.vit_b_16(pretrained = True)
 
@@ -161,7 +168,7 @@ def fine_tune():
     return (model_ft, criterion, optimizer_ft, exp_lr_scheduler)
 
 
-def visualize_model(model, num_images=6):
+def visualize_model(model, num_images=10):
     was_training = model.training
     model.eval()
     images_so_far = 0
@@ -172,7 +179,7 @@ def visualize_model(model, num_images=6):
             inputs = inputs.to(device)
             labels = labels.to(device)
 
-            print("labels: ", labels)
+            # print("labels: ", labels)
 
             outputs = model(inputs)
             _, preds = torch.max(outputs, 1)
@@ -181,7 +188,7 @@ def visualize_model(model, num_images=6):
                 images_so_far += 1
                 ax = plt.subplot(num_images//2, 2, images_so_far)
                 ax.axis('off')
-                ax.set_title(f'predicted: {class_names[preds[j]]}' + f'\n label: {class_names[labels[j]]}') # DOUBLE CHECK HOW YOU ARE DOING LABELING
+                ax.set_title(f'predicted: {class_names[preds[j]]}' + f' label: {class_names[labels[j]]}') # DOUBLE CHECK HOW YOU ARE DOING LABELING
                 imshow(inputs.cpu().data[j])
 
                 if images_so_far == num_images:
@@ -189,6 +196,41 @@ def visualize_model(model, num_images=6):
                     return
         model.train(mode=was_training)
 
+
+def check_accuracy(model):
+    was_training = model.training
+    model.eval()
+
+    num_correct = 0
+    num_samples = 0
+    num_classes = len(class_names)
+    confusion_matrix = torch.zeros(num_classes, num_classes)
+
+    with torch.no_grad():
+        for i, (inputs, labels) in enumerate(dataloaders['test']):
+
+            inputs = inputs.to(device)
+            labels = labels.to(device)
+
+            outputs = model(inputs)
+            _, preds = torch.max(outputs, 1)
+
+            num_correct += (preds == labels).sum()
+            num_samples += preds.size(0)
+
+            for j, (l, p) in enumerate(zip(labels, preds)):
+                confusion_matrix[l.long(), p.long()] += 1
+                # if class_names[l] == "naskh":
+                #     ax = plt.subplot(1, 1, 1)
+                #     ax.axis('off')
+                #     ax.set_title(f'predicted: {class_names[p]}' + f' label: {class_names[l]}') # DOUBLE CHECK HOW YOU ARE DOING LABELING
+                #     imshow(inputs.cpu().data[j])
+
+        print(f'Got {num_correct} / {num_samples} with total accuracy {float(num_correct)/float(num_samples)*100:.2f}') 
+        for k, class_accuracy in enumerate(list(confusion_matrix.diag() / confusion_matrix.sum(1))):
+            print(f'{class_names[k]} accuracy: {class_accuracy}')
+            
+        model.train(mode=was_training)
 
 
 if __name__ == "__main__":
@@ -210,11 +252,13 @@ if __name__ == "__main__":
         # imshow(out, title=[class_names[x] for x in classes])
 
         model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
-                        num_epochs=10)  
+                        num_epochs=2)  
         
         torch.save(model_ft.state_dict(), PATH)
     else:
         model_ft.load_state_dict(torch.load(PATH))
         model_ft.eval()
 
-    visualize_model(model_ft)
+    # visualize_model(model_ft)
+    # print("Classes: ", class_names[5])
+    check_accuracy(model_ft)
