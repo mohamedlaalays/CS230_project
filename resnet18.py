@@ -240,7 +240,7 @@ if __name__ == "__main__":
     model_ft, criterion, optimizer_ft, exp_lr_scheduler = fine_tune()
     # Get a batch of training data
     # inputs, classes = next(iter(dataloaders['train']))
-    PATH = "./lstmmodelgpu_20.pt"
+    PATH = "./lstmmodelgpu_2.pt"
 
     if training_mode:
         print("start training.................")
