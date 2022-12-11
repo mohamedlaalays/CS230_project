@@ -25,21 +25,19 @@ def load_data(data_dir='ACdata_base'):
 
     data_transforms = {
         'train': transforms.Compose([
-            # transforms.RandomResizedCrop(500),
+            # transforms.Resize(512),
             transforms.CenterCrop(500),
-            # transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
-            # transforms.Grayscale(num_output_channels=1), # Change to grayscale
         ]),
         'val': transforms.Compose([
-            # transforms.Resize(500),
+            # transforms.Resize(512),
             transforms.CenterCrop(500),
             transforms.ToTensor(),
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
-            # transforms.Grayscale(num_output_channels=1), # Change to grayscale
         ]),
         'test': transforms.Compose([
+            # transforms.Resize(512),
             transforms.CenterCrop(500),
             transforms.ToTensor(),
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
@@ -242,7 +240,7 @@ if __name__ == "__main__":
     model_ft, criterion, optimizer_ft, exp_lr_scheduler = fine_tune()
     # Get a batch of training data
     # inputs, classes = next(iter(dataloaders['train']))
-    PATH = "./lstmmodelgpu_10.pt"
+    PATH = "./lstmmodelgpu_20.pt"
 
     if training_mode:
         print("start training.................")
@@ -252,7 +250,7 @@ if __name__ == "__main__":
         # imshow(out, title=[class_names[x] for x in classes])
 
         model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
-                        num_epochs=2)  
+                        num_epochs=20)  
         
         torch.save(model_ft.state_dict(), PATH)
     else:
