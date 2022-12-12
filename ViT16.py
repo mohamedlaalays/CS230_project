@@ -54,7 +54,7 @@ if __name__ == "__main__":
     data_transforms = ViT_data_transforms()
     data_dir = "ACdata_base"
     dataloaders, num_classes, class_names, dataset_sizes = load_data(data_dir, data_transforms)
-    PATH = "./vit_ep2.pt"
+    PATH = "./vit16_epoch25.pt"
 
     model_ft = fine_tune(num_classes, device)
 
@@ -69,7 +69,7 @@ if __name__ == "__main__":
         model_ft = train_model(model_ft, device, dataloaders,
                             dataset_sizes, criterion, 
                             optimizer_ft, exp_lr_scheduler,
-                            num_epochs=2
+                            num_epochs=25
                             )
         torch.save(model_ft.state_dict(), PATH)  
     else:
