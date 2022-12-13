@@ -55,9 +55,9 @@ if __name__ == "__main__":
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     
     data_transforms = ViT_data_transforms()
-    data_dir = "ACdata_base_no_hand"
+    data_dir = "ACdata_base_no_train"
     dataloaders, num_classes, class_names, dataset_sizes = load_data(data_dir, data_transforms)
-    PATH = "./vit16_epoch25.pt"
+    PATH = "./vit16_epoch25_no_train.pt"
 
     model_ft = fine_tune(num_classes, device)
 

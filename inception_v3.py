@@ -14,21 +14,18 @@ def ViT_data_transforms():
     data_transforms = {
         'train': transforms.Compose([
             transforms.Resize((299, 299)),
-            transforms.CenterCrop(200),
             transforms.Grayscale(num_output_channels=3),
             transforms.ToTensor(),
             transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
         ]),
         'val': transforms.Compose([
             transforms.Resize((299, 299)),
-            transforms.CenterCrop(200),
             transforms.Grayscale(num_output_channels=3),
             transforms.ToTensor(),
             transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
         ]),
         'test': transforms.Compose([
             transforms.Resize((299, 299)),
-            transforms.CenterCrop(200),
             transforms.Grayscale(num_output_channels=3),
             transforms.ToTensor(),
             transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
@@ -58,9 +55,9 @@ if __name__ == "__main__":
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     
     data_transforms = ViT_data_transforms()
-    data_dir = "ACdata_base_no_hand"
+    data_dir = "ACdata_base_no_train"
     dataloaders, num_classes, class_names, dataset_sizes = load_data(data_dir, data_transforms)
-    PATH = "./inception_v3_epoch25.pt"
+    PATH = "./inception_v3_epoch25_no_train.pt"
 
     model_ft = fine_tune(num_classes, device)
 

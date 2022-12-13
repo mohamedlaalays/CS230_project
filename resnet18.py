@@ -14,22 +14,22 @@ def ViT_data_transforms():
    
     data_transforms = {
         'train': transforms.Compose([
-            # transforms.Resize((224, 224)),
-            # transforms.Grayscale(num_output_channels=3),
+            transforms.Resize((224, 224)),
+            transforms.Grayscale(num_output_channels=3),
             transforms.ToTensor(),
-            # transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
         ]),
         'val': transforms.Compose([
-            # transforms.Resize((224, 224)),
-            # transforms.Grayscale(num_output_channels=3),
+            transforms.Resize((224, 224)),
+            transforms.Grayscale(num_output_channels=3),
             transforms.ToTensor(),
-            # transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
         ]),
         'test': transforms.Compose([
-            # transforms.Resize((224, 224)),
-            # transforms.Grayscale(num_output_channels=3),
+            transforms.Resize((224, 224)),
+            transforms.Grayscale(num_output_channels=3),
             transforms.ToTensor(),
-            # transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
         ])
     }
 
@@ -40,9 +40,6 @@ def fine_tune(num_classes, device):
 
     model_ft = timm.create_model('resnet18', pretrained=True, num_classes=num_classes)
 
-    # model_ft = resnet18(weights=ResNet18_Weights.DEFAULT)
-    # num_ftrs = model_ft.fc.in_features
-    # model_ft.fc = nn.Linear(num_ftrs, num_classes)
     model_ft = model_ft.to(device)
 
     return model_ft
@@ -60,9 +57,9 @@ if __name__ == "__main__":
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     
     data_transforms = ViT_data_transforms()
-    data_dir = "ACdata_base_no_hand"
+    data_dir = "ACdata_base_no_train"
     dataloaders, num_classes, class_names, dataset_sizes = load_data(data_dir, data_transforms)
-    PATH = "./resnet18_epoch25.pt"
+    PATH = "./resnet18_epoch25_no_train.pt"
 
     model_ft = fine_tune(num_classes, device)
 
