@@ -1,4 +1,5 @@
 from __future__ import print_function, division
+from platform import architecture
 import timm
 import torch
 import torch.nn as nn
@@ -64,9 +65,14 @@ if __name__ == "__main__":
 
 
     dataloaders, num_classes, class_names, dataset_sizes = load_data(data_dir, data_transforms)
-    PATH = "./resnet18_epoch10_original.pt"
-    # PATH = "./resnet18_epoch10_compl.pt"
-    # PATH = "./resnet18_epoch10_no_train.pt"
+
+    PATH = "./resnet18_epoch10_original.pt"     # ==> Original AC dataset
+    # PATH = "./resnet18_epoch10_compl.pt"      # ==> AC dataset + Calliar dataset evenly distributed in train, eval, test
+    # PATH = "./resnet18_epoch10_no_train.pt"   # ==> AC dataset + Calliar dataset only in eval and test
+    
+    architecture = "resnet18_epoch10_original" 
+    # architecture = "resnet18_epoch10_compl"
+    # architecture = "resnet18_epoch10_no_train"
 
     model_ft = fine_tune(num_classes, device)
 
@@ -85,10 +91,10 @@ if __name__ == "__main__":
                             optimizer_ft, exp_lr_scheduler,
                             num_epochs=10
                             )
-        torch.save(model_ft.state_dict(), PATH)  
+        torch.save(model_ft.state_dict(), "./trained_models/"+PATH)  
     else:
-        model_ft.load_state_dict(torch.load(PATH))
+        model_ft.load_state_dict(torch.load("./trained_models/"+PATH))
         model_ft.eval()
 
     # visualize_model_pred(model_ft, device, dataloaders, class_names, num_images=10)
-    check_accuracy(model_ft, device, dataloaders, class_names)
+    check_accuracy(model_ft, device, dataloaders, class_names, architecture)

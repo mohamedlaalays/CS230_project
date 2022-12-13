@@ -59,9 +59,14 @@ if __name__ == "__main__":
     # data_dir = "ACdata_base"
     # data_dir = "ACdata_base_no_train"
     dataloaders, num_classes, class_names, dataset_sizes = load_data(data_dir, data_transforms)
+
     PATH = "./vit16_epoch10_original.pt"
     # PATH = "./vit16_epoch10_compl.pt"
     # PATH = "./vit16_epoch10_no_train.pt"
+
+    architecture = "vit16_epoch10_original" 
+    # architecture = "vit16_epoch10_compl"
+    # architecture = "vit16_epoch10_no_train"
 
     model_ft = fine_tune(num_classes, device)
 
@@ -78,11 +83,11 @@ if __name__ == "__main__":
                             optimizer_ft, exp_lr_scheduler,
                             num_epochs=10
                             )
-        torch.save(model_ft.state_dict(), PATH)  
+        torch.save(model_ft.state_dict(), "./trained_models/"+PATH)  
     else:
-        model_ft.load_state_dict(torch.load(PATH))
+        model_ft.load_state_dict(torch.load("./trained_models/"+PATH))
         model_ft.eval()
 
     # visualize_model_pred(model_ft, device, dataloaders, class_names, num_images=10)
     # print("Classes: ", class_names[5])
-    check_accuracy(model_ft, device, dataloaders, class_names)
+    check_accuracy(model_ft, device, dataloaders, class_names, architecture)

@@ -6,6 +6,9 @@ import torch
 import matplotlib.pyplot as plt
 from torchvision import datasets, models, transforms
 from sklearn.metrics import classification_report
+import seaborn as sn
+import pandas as pd
+from sklearn.metrics import confusion_matrix
 
 
 """
@@ -98,14 +101,14 @@ def train_model(model, device, dataloaders, dataset_sizes, criterion, optimizer,
 
 
 
-def check_accuracy(model, device, dataloaders, class_names):
+def check_accuracy(model, device, dataloaders, class_names, architecture):
     was_training = model.training
     model.eval()
 
     num_correct = 0
     num_samples = 0
     num_classes = len(class_names)
-    confusion_matrix = torch.zeros(num_classes, num_classes)
+    my_confusion_matrix = torch.zeros(num_classes, num_classes)
 
     with torch.no_grad():
         pred_y, true_y = [], []
@@ -117,14 +120,14 @@ def check_accuracy(model, device, dataloaders, class_names):
             outputs = model(inputs)
             _, preds = torch.max(outputs, 1)
 
-            pred_y.extend(preds)
-            true_y.extend(labels)
+            pred_y.extend(preds.data.cpu().numpy())
+            true_y.extend(labels.data.cpu().numpy())
 
             num_correct += (preds == labels).sum()
             num_samples += preds.size(0)
 
             for j, (l, p) in enumerate(zip(labels, preds)):
-                confusion_matrix[l.long(), p.long()] += 1
+                my_confusion_matrix[l.long(), p.long()] += 1
                 # if class_names[l] == "naskh":
                 #     ax = plt.subplot(1, 1, 1)
                 #     ax.axis('off')
@@ -132,14 +135,27 @@ def check_accuracy(model, device, dataloaders, class_names):
                 #     imshow(inputs.cpu().data[j])
 
         print(f'Got {num_correct} / {num_samples} with total accuracy {float(num_correct)/float(num_samples)*100:.2f}') 
-        for k, class_accuracy in enumerate(list(confusion_matrix.diag() / confusion_matrix.sum(1))):
+        for k, class_accuracy in enumerate(list(my_confusion_matrix.diag() / my_confusion_matrix.sum(1))):
             print(f'{class_names[k]} accuracy: {class_accuracy}')
             
         print("Confusion matrix: ")
-        print(confusion_matrix)
+        print(my_confusion_matrix)
 
         print("Classification report:")
-        print(classification_report(true_y, pred_y, digits=3))
+        cl_rep = classification_report(true_y, pred_y, digits=3)
+        print(cl_rep)
+        # df_cl_rep = pd.DataFrame(cl_rep)
+        # plt.figure(figsize = (12,7))
+        # sn.heatmap(df_cl_rep, annot=True)
+        # plt.savefig("./images/"+ "class_" + architecture + '.png')
+
+        cf_matrix = confusion_matrix(true_y, pred_y)
+        df_cm = pd.DataFrame(cf_matrix/np.sum(cf_matrix) *9, index = [i for i in class_names],
+                            columns = [i for i in class_names])
+
+        plt.figure(figsize = (12,7))
+        sn.heatmap(df_cm, annot=True)
+        plt.savefig("./images/" + "conf_" + architecture + '.png')
 
         model.train(mode=was_training)
 
