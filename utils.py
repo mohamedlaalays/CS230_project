@@ -5,6 +5,7 @@ import numpy as np
 import torch
 import matplotlib.pyplot as plt
 from torchvision import datasets, models, transforms
+from sklearn.metrics import classification_report
 
 
 """
@@ -107,6 +108,7 @@ def check_accuracy(model, device, dataloaders, class_names):
     confusion_matrix = torch.zeros(num_classes, num_classes)
 
     with torch.no_grad():
+        pred_y, true_y = [], []
         for i, (inputs, labels) in enumerate(dataloaders['test']):
 
             inputs = inputs.to(device)
@@ -114,6 +116,9 @@ def check_accuracy(model, device, dataloaders, class_names):
 
             outputs = model(inputs)
             _, preds = torch.max(outputs, 1)
+
+            pred_y.extend(preds)
+            true_y.extend(labels)
 
             num_correct += (preds == labels).sum()
             num_samples += preds.size(0)
@@ -130,6 +135,12 @@ def check_accuracy(model, device, dataloaders, class_names):
         for k, class_accuracy in enumerate(list(confusion_matrix.diag() / confusion_matrix.sum(1))):
             print(f'{class_names[k]} accuracy: {class_accuracy}')
             
+        print("Confusion matrix: ")
+        print(confusion_matrix)
+
+        print("Classification report:")
+        print(classification_report(true_y, pred_y, digits=3))
+
         model.train(mode=was_training)
 
 

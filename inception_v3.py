@@ -55,9 +55,15 @@ if __name__ == "__main__":
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     
     data_transforms = ViT_data_transforms()
-    data_dir = "ACdata_base_no_train"
+    data_dir = "ACdata_base_original"
+    # data_dir = "ACdata_base"
+    # data_dir = "ACdata_base_no_train"
+
     dataloaders, num_classes, class_names, dataset_sizes = load_data(data_dir, data_transforms)
-    PATH = "./inception_v3_epoch25_no_train.pt"
+    PATH = "./inception_v3_epoch25_orinal.pt"
+    # PATH = "./inception_v3_epoch10_compl.pt"
+    # PATH = "./inception_v3_epoch10_no_train.pt"
+    
 
     model_ft = fine_tune(num_classes, device)
 
@@ -74,7 +80,7 @@ if __name__ == "__main__":
         model_ft = train_model(model_ft, device, dataloaders,
                             dataset_sizes, criterion, 
                             optimizer_ft, exp_lr_scheduler,
-                            num_epochs=25
+                            num_epochs=10
                             )
         torch.save(model_ft.state_dict(), PATH)  
     else:
